@@ -9,7 +9,6 @@ from detector import detectGameTopK
 from video import videoToFrames, getVideoDetails
 from utils import cacheEmbeddings
 
-start = time.time()
 if os.path.exists("../cachedEmbeddings/refEmbed.pkl"):
     print("-> Using cached Embedding.\n-> Delete cache if you want to create new embeddings")
         
@@ -44,6 +43,7 @@ def main():
         if videoPath.lower() == "q":
             break
         
+        start = time.time()
         if not os.path.exists(videoPath):
             print("Video does not exist.\n")
             continue
