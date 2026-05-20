@@ -92,17 +92,9 @@ referenceGames/
     └── ...
 ```
 
-Then run this once from inside `app/` to build and cache the embeddings:
+Then delete the `refEmbed.pkl` in the cachedEmbeddings folder to generate new embeddings based on your data. New embeddings are generated on running `main.py`
 
-```python
-from embeddings import buildReferenceEmbeddings
-from utils import cacheEmbeddings
-
-referenceEmbeddings, _ = buildReferenceEmbeddings("../referenceGames")
-cacheEmbeddings(referenceEmbeddings)
-```
-
-This overwrites `cachedEmbeddings/refEmbed.pkl` with your new embeddings. More screenshots per game = better accuracy. Aim for at least 10-20 varied screenshots covering different scenes, HUDs, and moments.
+More screenshots per game = better accuracy. Aim for at least 10-20 varied screenshots covering different scenes, HUDs, and moments.
 
 ---
 
@@ -130,6 +122,7 @@ Detected Game: Valorant
 ```
 
 - Videos longer than **2 minutes** are automatically capped at the first 2 minutes.
+- You can choose the duration you want by changing the parameters of `videoToFrame` function in the `main.py`
 - If no frame clears the similarity threshold, the clip is reported as **Unknown Game**.
 - Enter `q` to quit.
 
