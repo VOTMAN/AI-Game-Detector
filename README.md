@@ -60,7 +60,54 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 │   └── refEmbed.pkl         # Pre-built embeddings (shipped with repo)
 ├── videoClips/              # Put your test clips here
 ├── extractedFrames/         # Auto-generated during detection
-└── requirements.txt
+├── requirements.txt
+└── frontend/								 # Home to all the frontend code
+		├── src/
+		│   ├── lib/
+		│   │   ├── assets/
+		│   │   │   └── heroPic.png
+		│   │   │
+		│   │   ├── components/
+		│   │   │   ├── Navbar.svelte
+		│   │   │   └── ThemeToggle.svelte
+		│   │   │
+		│   │   ├── vitest-examples/
+		│   │   │
+		│   │   └── index.ts
+		│   │
+		│   ├── routes/
+		│   │   ├── upload/
+		│   │   │   ├── clip/
+		│   │   │   │   └── +page.svelte
+		│   │   │   │
+		│   │   │   └── frame/
+		│   │   │       └── +page.svelte
+		│   │   │
+		│   │   ├── +layout.svelte
+		│   │   └── +page.svelte
+		│   │
+		│   ├── app.html
+		│   ├── app.d.ts
+		│   └── app.css
+		│
+		├── static/
+		│
+		├── .svelte-kit/
+		├── .vscode/
+		├── node_modules/
+		│
+		├── .gitignore
+		├── .npmrc
+		├── .prettierignore
+		├── .prettierrc
+		├── eslint.config.js
+		├── package.json
+		├── package-lock.json
+		├── README.md
+		├── svelte.config.js
+		├── tsconfig.json
+		└── vite.config.ts
+
 ```
 
 ---
@@ -98,7 +145,7 @@ More screenshots per game = better accuracy. Aim for at least 10-20 varied scree
 
 ---
 
-## Usage
+## Usage (CLI)
 
 Run from inside the `app/` directory:
 
@@ -140,13 +187,18 @@ Install all via:
 ```bash
 pip install -r requirements.txt
 ```
+---
+
+## Usage (web-ui)
+
+Still in the work
 
 ---
 
 ## Future Plans
 
-- [ ] Web frontend for drag-and-drop video upload
-- [ ] Expand shipped reference library with more games
-- [ ] Support for single image/screenshot detection (not just video)
-- [ ] Confidence score display in output
+- [ ] Web frontend for drag-and-drop video upload (Partially done)
+- [ ] Expand shipped reference library with more games (Always in progress)
+- [*] Support for single image/screenshot detection (not just video)
+- [*] Confidence score display in output
 - [ ] Auto-download reference packs for popular games
