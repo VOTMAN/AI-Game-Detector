@@ -127,7 +127,14 @@ source myenv/bin/activate       # Windows: myenv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**3. (Optional) Build your own reference embeddings**
+**3. Install frontend dependencies**
+
+```bash
+cd frontend
+npm install
+```
+
+**4. (Optional) Build your own reference embeddings**
 
 If you want to add your own games, create a `referenceGames/` folder next to `app/` and populate it with screenshots:
 
@@ -145,7 +152,7 @@ More screenshots per game = better accuracy. Aim for at least 10-20 varied scree
 
 ---
 
-## Usage (CLI)
+## Usage — CLI
 
 Run from inside the `app/` directory:
 
@@ -168,37 +175,135 @@ Extraction Complete
 Detected Game: Valorant
 ```
 
-- Videos longer than **2 minutes** are automatically capped at the first 2 minutes.
+- Videos longer than **3 minutes** are automatically capped at the first 3 minutes.
 - You can choose the duration you want by changing the parameters of `videoToFrame` function in the `main.py`
 - If no frame clears the similarity threshold, the clip is reported as **Unknown Game**.
 - Enter `q` to quit.
+- Supports command line arguments. Order: 
+ 	```sh
+  python main.py (video_clip_path) (startTime) (endTime)
+	```
+
+---
+
+## Usage — Backend (FastAPI)
+
+Run from inside the `backend/` directory:
+
+```bash
+cd backend
+uvicorn main:app --reload
+```
+
+The API will be available at `http://localhost:8000`.
+
+### Endpoints
+
+#### `POST /upload/clip`
+
+Detect the game in a video clip.
+
+**Form fields:**
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `file` | File | Yes | — | Video file (.mp4, .mov, .avi) |
+| `startTime` | String | No | `00:00` | Start time in MM:SS format |
+| `endTime` | String | No | None | End time in MM:SS format |
+
+**Response:**
+
+```json
+{
+  "id": "98a0683c-9ad5-40d9-bbb4-b6fe1d5d7c70",
+  "prediction": "Elden_Ring",
+  "confidences": [["Elden_Ring", 100.0]],
+  "frames": [
+    "/frames/98a0683c-.../frame_0003_medium.jpg",
+    "/frames/98a0683c-.../frame_0010_medium.jpg",
+    "/frames/98a0683c-.../frame_0028_medium.jpg"
+  ]
+}
+```
+
+#### `POST /upload/frame` (in works)
+
+Detect the game in a single screenshot.
+
+**Form fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `file` | File | Yes | Image file (.png, .jpg, .jpeg) |
+
+**Response:**
+
+```json
+{
+  "prediction": "Valorant",
+  "confidence": 0.91
+}
+```
+
+#### `GET /frames/{id}/{filename}`
+
+Retrieve an extracted frame image by ID and filename. Used by the frontend to display influential frames after a clip detection.
+
+---
+
+## Usage — Web UI
+
+Run the backend and frontend simultaneously:
+
+```bash
+# Terminal 1 — backend
+cd backend
+uvicorn main:app --reload
+
+# Terminal 2 — frontend
+cd frontend
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
+
+- Upload a video clip or a screenshot via the upload pages.
+- The detected game, confidence breakdown, and most influential frames are shown on the results page. *(In works)*
 
 ---
 
 ## Requirements
 
 - Python 3.12
+- Node.js 18+
 - torch
 - open-clip-torch
 - opencv-python
 - Pillow
+- fastapi
+- uvicorn
+- python-multipart
 
-Install all via:
+Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
----
 
-## Usage (web-ui)
+Install frontend dependencies:
 
-Still in the work
+```bash
+cd frontend && npm install
+```
 
 ---
 
 ## Future Plans
 
-- [ ] Web frontend for drag-and-drop video upload (Partially done)
-- [ ] Expand shipped reference library with more games (Always in progress)
 - [*] Support for single image/screenshot detection (not just video)
 - [*] Confidence score display in output
-- [ ] Auto-download reference packs for popular games
+- [ ] Results page with full confidence breakdown and frame viewer
+- [ ] Detection history page with past predictions
+- [ ] Deduplication — reuse results for previously seen clips
+- [ ] Event detection within clips (kills, deaths, aces, explosions, etc.)
+- [ ] Expand shipped reference library with more games
