@@ -72,9 +72,12 @@ async def get_frame(temp_id: str, filename: str):
 
     req_path = (SAVE_DIR / temp_id / filename).resolve()
 
-    if not os.path.exists(path):
+    if not str(req_path).startswith(str(SAVE_DIR.resolve())):
+        return {"error": "Invalid Path"}
+    
+    if not os.path.exists(req_path):
         return { "error": "Frame not found, Rerun Detection" }
-    return FileResponse(path, media_type="image/jpeg")
+    return FileResponse(req_path, media_type="image/jpeg")
 
 
 @app.post("/upload/clip")
@@ -101,7 +104,7 @@ async def getClip(
         print("Error: Start time and end time cannot be equal")
         return { "error" : "Start and end times are equal"}
     
-    
+
     with open(temp_video_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
 
