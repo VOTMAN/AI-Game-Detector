@@ -1,14 +1,14 @@
 import os
-
 import torch
 import open_clip
 from open_clip import tokenizer
-
 from PIL import Image
 from collections import defaultdict
 
 print("Torch version:", torch.__version__)
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REF_DIR = os.path.join(BASE_DIR, "referenceGames")
 
 # load the model
 model, _, preprocess = open_clip.create_model_and_transforms(
@@ -38,7 +38,7 @@ def getImgEmbeddings(imgPath):
     return features.squeeze(0)
 
 
-def buildReferenceEmbeddings(refFolder = "../referenceGames"):
+def buildReferenceEmbeddings(refFolder = REF_DIR):
     referenceEmbeddings = defaultdict(list)
     gameMeanEmbeddings = {}
     

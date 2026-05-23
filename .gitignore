@@ -1,7 +1,7 @@
 *.ipynb_checkpoints
 referenceGames
 extractedFrames
-myenv
+*env
 notebooks
 photos
 videoClips

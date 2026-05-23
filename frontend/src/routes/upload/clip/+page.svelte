@@ -4,6 +4,7 @@
 	let endTime = $state<string | undefined>(undefined);
 	let loading = $state(false);
 	let errorText = $state<string | undefined>(undefined);
+	let re = /^(?:[0-5]\d):(?:[0-5]\d)$/;
 	const MAX_VIDEO_SIZE = 500 * 1024 * 1024;
 
 	function handleVideoChange(e: Event) {
@@ -24,6 +25,12 @@
 			errorText = 'All fields must be filled';
 			return;
 		}
+
+		if ((startTime && re.test(startTime)) || (endTime && re.test(endTime))) {
+			errorText = 'Invalid time format';
+			return;
+		}
+
 		loading = true;
 		console.log('Uploading Video', videoFile, startTime, endTime);
 		// upload

@@ -6,3 +6,7 @@ regex
 tqdm
 torch
 Pillow
+fastapi
+uvicorn
+python-multipart
+starlette

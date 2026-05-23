@@ -1,6 +1,11 @@
 import cv2
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+VIDEO_DIR = os.path.join(BASE_DIR, "extractedFrames")
+os.makedirs(VIDEO_DIR, exist_ok=True)
+
 def getVideoDetails(videoPath):
     cap = cv2.VideoCapture(videoPath)
     
@@ -15,7 +20,7 @@ def getVideoDetails(videoPath):
     cap.release()
     return fps, frameCount, durationSecond
 
-def videoToFrames(videoPath, outputFolder = "misc", startTime = "00:00", endTime = None, intervalSeconds = 1, fileExt = "jpg"):
+def videoToFrames(videoPath, outputFolder = "misc", startTime = "00:00", endTime = None, intervalSeconds = 2, fileExt = "jpg"):
     SMin, SSec = startTime.split(":")
     startTime = (int(SMin) * 60) + int(SSec)
 
@@ -23,11 +28,12 @@ def videoToFrames(videoPath, outputFolder = "misc", startTime = "00:00", endTime
         EMin, ESec = endTime.split(":")
         endTime = (int(EMin) * 60) + int(ESec)
     
+
     if endTime is not None and endTime <= startTime:
         print("Error: Invalid range")
         return
     
-    finalOpFolder = os.path.join("../extractedFrames", outputFolder)
+    finalOpFolder = os.path.join(VIDEO_DIR, outputFolder)
     os.makedirs(finalOpFolder, exist_ok=True)
 
     smallDir = os.path.join(finalOpFolder, "small")
@@ -46,9 +52,13 @@ def videoToFrames(videoPath, outputFolder = "misc", startTime = "00:00", endTime
         endTime = durationSecond
     
     if startTime >= durationSecond:
-        print("Error: Start time exceeds video duration")
+        print("Error: startTime exceeds video duration")
         return
         
+    if endTime is not None and endTime > durationSecond:
+        print("Error: endTime exceeds video duration")
+        return
+    
     selectedDuration = (
         endTime - startTime
         if endTime is not None
