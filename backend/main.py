@@ -87,6 +87,7 @@ async def getAllRes():
 
 @app.get("/api/results/{id}")
 async def getRes(id: str):
+
     res: PredResults = getResult(id)
     return res
 
@@ -163,6 +164,7 @@ async def predClip(
 
         res = saveResult(PredResults(
             id=temp_id,
+            clip_name=file.filename,
             prediction=result["prediction"],
             confidences=result["confidences"],
             frames=[f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)],

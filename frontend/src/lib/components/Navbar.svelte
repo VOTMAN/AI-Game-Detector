@@ -16,6 +16,7 @@
 		<li><a href={resolve('/')}>Home</a></li>
 		<li><a href={resolve('/upload/frame')}>Upload Frame</a></li>
 		<li><a href={resolve('/upload/clip')}>Upload Clip</a></li>
+		<li><a href={resolve('/history')}>History</a></li>
 		<li><ThemeToggle onclick={toggleTheme} /></li>
 	</ul>
 </nav>
