@@ -91,6 +91,28 @@ async def getRes(id: str):
     return res
 
 
+@app.get("/api/frames/{id}/{filename}")
+async def get_frame(id: str, filename: str):
+
+    requested_path = (SAVE_DIR / id / filename).resolve()
+
+    # Ensure requested path stays inside SAVE_DIR
+    if not str(requested_path).startswith(str(SAVE_DIR.resolve())):
+        return {"error": "Invalid path"}
+
+    # Ensure file exists
+    if not requested_path.exists():
+        return {"error": "Frame not found, Rerun Detection"}
+
+    return FileResponse(
+        requested_path, 
+        media_type="image/jpeg", 
+        headers={
+        "Cache-Control": "public, max-age=86400"
+        }
+    )
+
+
 @app.post("/api/upload/clip")
 async def predClip(
     file: UploadFile,
