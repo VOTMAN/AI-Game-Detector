@@ -1,18 +1,21 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+
 	let videoFile = $state<File | undefined>(undefined);
 	let startTime = $state('00:00');
 	let endTime = $state<string | undefined>(undefined);
 	let loading = $state(false);
 	let errorText = $state<string | undefined>(undefined);
 	let re = /^(?:[0-5]\d):(?:[0-5]\d)$/;
-	const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
+	const MAX_VIDEO_SIZE = 350 * 1024 * 1024;
 
 	function handleVideoChange(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
 		errorText = undefined;
 		if (!file) return;
 		if (file.size > MAX_VIDEO_SIZE) {
-			errorText = 'Video must be under 200MB';
+			errorText = 'Video must be under 350MB';
 			return;
 		}
 		videoFile = file;
@@ -43,8 +46,8 @@
 				method: 'POST',
 				body: form
 			});
-			const result = await res.json();
-			console.log(result);
+			const { id } = await res.json();
+			goto(resolve(`/result/${JSON.stringify(id).replaceAll('"', '')}`));
 		} catch (e) {
 			console.log(e);
 		} finally {

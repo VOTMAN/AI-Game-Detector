@@ -5,12 +5,13 @@ import shutil
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
 from pathlib import Path
+from datetime import datetime, timedelta
+
 
 from fastapi import FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from starlette.status import HTTP_504_GATEWAY_TIMEOUT
 
 from db.models import PredResults
@@ -59,8 +60,8 @@ async def startup():
 
 @app.middleware("http")
 async def timeout_middleware(request: Request, call_next):
+    start_time = time.time()
     try:
-        start_time = time.time()
         return await asyncio.wait_for(call_next(request), timeout=REQUEST_TIMEOUT_ERROR)
 
     except asyncio.TimeoutError:
@@ -87,9 +88,12 @@ async def getAllRes():
 
 @app.get("/api/results/{id}")
 async def getRes(id: str):
-
     res: PredResults = getResult(id)
-    return res
+    return Response(
+        content=res.model_dump_json(),
+        media_type="application/json",
+        headers={"Cache-Control": "public, max-age=3600"}
+    )
 
 
 @app.get("/api/frames/{id}/{filename}")
@@ -167,7 +171,7 @@ async def predClip(
             clip_name=file.filename,
             prediction=result["prediction"],
             confidences=result["confidences"],
-            frames=[f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)],
+            frames=[f"/api/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)],
             time_taken=result["time_taken"]
         ))
 

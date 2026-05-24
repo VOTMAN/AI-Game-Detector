@@ -32,7 +32,7 @@ def getResult(id: str):
 def getAllResults() -> list[PredResults]:
     try:
         with Session(engine) as session:
-            statement = select(PredResults)
+            statement = select(PredResults).order_by(PredResults.created_datetime.desc())
             results = session.exec(statement)
             res = results.all()
             return res
