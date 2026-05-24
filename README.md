@@ -1,6 +1,6 @@
 # AI Game Detector
 
-Detects which video game is being played in a video clip using AI-powered image embeddings. Drop in a clip, get the game name.
+Detects which video game is being played in a video clip using AI-powered image embeddings. Drop in a clip or a screenshot, get the game name.
 
 Currently supports **CS2, Elden Ring, Hollow Knight, and Valorant**, with pre-built embeddings shipped directly in the repo.
 
@@ -13,10 +13,10 @@ The detector uses **OpenCLIP (ViT-B-32)** to convert images into semantic embedd
 ### Detection Flow
 
 ```
-Video Clip
+Video Clip / Screenshot
     │
     ▼
-Extract a frame every 2 seconds           (video.py)
+Extract a frame every 2 seconds           (video.py)        [Video only]
     │
     ▼
 For each frame:
@@ -25,13 +25,13 @@ For each frame:
   → Pick best game for that frame         (detector.py)
     │
     ▼
-Majority vote across all frames           (main.py)
+Majority vote across all frames           (main.py)         [Video only]
     │
     ▼
 Final Prediction: "Game Name"
 ```
 
-### Two-Level Voting
+### Two-Level Voting (Video)
 
 Detection runs at two levels for robustness:
 
@@ -51,63 +51,50 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 ```
 .
 ├── app/
-│   ├── main.py              # Entry point
+│   ├── main.py              # CLI entry point + shared detectVideo / detectFrame functions
 │   ├── detector.py          # Frame-level game detection
 │   ├── embeddings.py        # OpenCLIP model + embedding functions
 │   ├── video.py             # Video frame extraction
-│   └── utils.py             # Embedding cache helpers
+│   └── utils.py             # Embedding cache helpers + shared detection wrappers
+├── backend/
+│   ├── main.py              # FastAPI server
+│   └──db/
+│      ├── db.py                # SQLite database helpers (init, save, get, getAll)
+│      └── models.py            # SQLModel table definitions (PredResults)
 ├── cachedEmbeddings/
 │   └── refEmbed.pkl         # Pre-built embeddings (shipped with repo)
-├── videoClips/              # Put your test clips here
 ├── extractedFrames/         # Auto-generated during detection
+│   └── save/                # Persistent influential frames served to the frontend (The server auto delete after 2 hours)
 ├── requirements.txt
-└── frontend/								 # Home to all the frontend code
-		├── src/
-		│   ├── lib/
-		│   │   ├── assets/
-		│   │   │   └── heroPic.png
-		│   │   │
-		│   │   ├── components/
-		│   │   │   ├── Navbar.svelte
-		│   │   │   └── ThemeToggle.svelte
-		│   │   │
-		│   │   ├── vitest-examples/
-		│   │   │
-		│   │   └── index.ts
-		│   │
-		│   ├── routes/
-		│   │   ├── upload/
-		│   │   │   ├── clip/
-		│   │   │   │   └── +page.svelte
-		│   │   │   │
-		│   │   │   └── frame/
-		│   │   │       └── +page.svelte
-		│   │   │
-		│   │   ├── +layout.svelte
-		│   │   └── +page.svelte
-		│   │
-		│   ├── app.html
-		│   ├── app.d.ts
-		│   └── app.css
-		│
-		├── static/
-		│
-		├── .svelte-kit/
-		├── .vscode/
-		├── node_modules/
-		│
-		├── .gitignore
-		├── .npmrc
-		├── .prettierignore
-		├── .prettierrc
-		├── eslint.config.js
-		├── package.json
-		├── package-lock.json
-		├── README.md
-		├── svelte.config.js
-		├── tsconfig.json
-		└── vite.config.ts
-
+└── frontend/                # SvelteKit web UI
+    ├── src/
+    │   ├── lib/
+    │   │   ├── assets/
+    │   │   │   └── heroPic.png
+    │   │   ├── components/
+    │   │   │   ├── Navbar.svelte
+    │   │   │   └── ThemeToggle.svelte
+    │   │   └── types.ts         # Shared TypeScript types (DetectionResult)
+    │   │   
+    │   ├── routes/
+    │   │   ├── upload/
+    │   │   │   ├── clip/
+    │   │   │   │   └── +page.svelte
+    │   │   │   └── frame/
+    │   │   │       └── +page.svelte
+    │   │   ├── results/
+    │   │   │   └── [id]/
+    │   │   │       ├── +page.svelte
+    │   │   │       └── +page.server.ts
+    │   │   ├── history/
+    │   │   │   ├── +page.svelte
+    │   │   │   └── +page.ts
+    │   │   ├── +layout.svelte
+    │   │   └── +page.svelte
+    │   ├── app.html
+    │   ├── app.d.ts
+    │   └── app.css
+    └── static/
 ```
 
 ---
@@ -115,6 +102,7 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 ## Setup
 
 **1. Clone the repo and create a virtual environment**
+
 ```bash
 git clone <repo-url>
 cd aipro
@@ -122,7 +110,8 @@ python -m venv myenv
 source myenv/bin/activate       # Windows: myenv\Scripts\activate
 ```
 
-**2. Install dependencies**
+**2. Install Python dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -136,7 +125,7 @@ npm install
 
 **4. (Optional) Build your own reference embeddings**
 
-If you want to add your own games, create a `referenceGames/` folder next to `app/` and populate it with screenshots:
+If you want to add your own games, create a `referenceGames/` folder at the project root and populate it with screenshots:
 
 ```
 referenceGames/
@@ -146,9 +135,9 @@ referenceGames/
     └── ...
 ```
 
-Then delete the `refEmbed.pkl` in the cachedEmbeddings folder to generate new embeddings based on your data. New embeddings are generated on running `main.py`
+Then delete `cachedEmbeddings/refEmbed.pkl` — new embeddings will be generated automatically the next time `main.py` runs.
 
-More screenshots per game = better accuracy. Aim for at least 10-20 varied screenshots covering different scenes, HUDs, and moments.
+More screenshots per game = better accuracy. Aim for at least 10–20 varied screenshots covering different scenes, HUDs, and gameplay moments.
 
 ---
 
@@ -161,7 +150,7 @@ cd app
 python main.py
 ```
 
-You'll be prompted to enter a video path:
+You'll be prompted to enter a path to a video or image:
 
 ```
 === AI Game Detector ===
@@ -173,16 +162,24 @@ Selected Duration: 118.0
 Extraction Complete
 
 Detected Game: Valorant
+
+Confidence Breakdown:
+Valorant: 100.00%
+
+Most Influential Frames from the Clip:
+../extractedFrames/Valorant/small/frame_0003_small.jpg
+../extractedFrames/Valorant/small/frame_0010_small.jpg
+../extractedFrames/Valorant/small/frame_0021_small.jpg
 ```
 
 - Videos longer than **3 minutes** are automatically capped at the first 3 minutes.
-- You can choose the duration you want by changing the parameters of `videoToFrame` function in the `main.py`
-- If no frame clears the similarity threshold, the clip is reported as **Unknown Game**.
+- Start and end times can be customised via command line arguments:
+  ```bash
+  python main.py <video_path> <startTime> <endTime>
+  # e.g. python main.py ../videoClips/Valorant.mp4 00:30 02:00
+  ```
+- If no frame clears the similarity threshold, the result is reported as **Unknown Game**.
 - Enter `q` to quit.
-- Supports command line arguments. Order: 
- 	```sh
-  python main.py (video_clip_path) (startTime) (endTime)
-	```
 
 ---
 
@@ -195,11 +192,11 @@ cd backend
 uvicorn main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`.
+The API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
 
 ### Endpoints
 
-#### `POST /upload/clip`
+#### `POST /api/upload/clip`
 
 Detect the game in a video clip.
 
@@ -215,18 +212,15 @@ Detect the game in a video clip.
 
 ```json
 {
-  "id": "98a0683c-9ad5-40d9-bbb4-b6fe1d5d7c70",
-  "prediction": "Elden_Ring",
-  "confidences": [["Elden_Ring", 100.0]],
-  "frames": [
-    "/frames/98a0683c-.../frame_0003_medium.jpg",
-    "/frames/98a0683c-.../frame_0010_medium.jpg",
-    "/frames/98a0683c-.../frame_0028_medium.jpg"
-  ]
+  "id": "98a0683c-9ad5-40d9-bbb4-b6fe1d5d7c70"
 }
 ```
 
-#### `POST /upload/frame` (in works)
+Detection result is saved to the database. Use `GET /api/results/{id}` to retrieve it.
+
+---
+
+#### `POST /api/upload/frame`
 
 Detect the game in a single screenshot.
 
@@ -245,9 +239,41 @@ Detect the game in a single screenshot.
 }
 ```
 
-#### `GET /frames/{id}/{filename}`
+---
 
-Retrieve an extracted frame image by ID and filename. Used by the frontend to display influential frames after a clip detection.
+#### `GET /api/results/{id}`
+
+Retrieve a stored detection result by ID.
+
+**Response:**
+
+```json
+{
+  "id": "98a0683c-9ad5-40d9-bbb4-b6fe1d5d7c70",
+  "clip_name": "Valorant.mp4",
+  "prediction": "Valorant",
+  "confidences": [["Valorant", 100.0]],
+  "frames": [
+    "/api/frames/98a0683c-.../frame_0003_medium.jpg",
+    "/api/frames/98a0683c-.../frame_0010_medium.jpg",
+    "/api/frames/98a0683c-.../frame_0028_medium.jpg"
+  ],
+  "time_taken": 11.4,
+  "created_datetime": "2026-05-24T14:11:15"
+}
+```
+
+---
+
+#### `GET /api/results/all`
+
+Retrieve all stored detection results, sorted by most recent.
+
+---
+
+#### `GET /api/frames/{id}/{filename}`
+
+Retrieve an extracted frame image by detection ID and filename. Used by the frontend to display influential frames. Frames are cached on the server for 2 hours before cleanup.
 
 ---
 
@@ -267,8 +293,10 @@ npm run dev
 
 Then open `http://localhost:5173` in your browser.
 
-- Upload a video clip or a screenshot via the upload pages.
-- The detected game, confidence breakdown, and most influential frames are shown on the results page. *(In works)*
+- Upload a video clip via `/upload/clip` — the detected game, confidence breakdown, and most influential frames are shown on the results page.
+- Upload a single screenshot via `/upload/frame` for quick single-frame detection.
+- Browse all past detections on the `/history` page.
+- Theme (light/dark) is persisted across sessions via `localStorage`.
 
 ---
 
@@ -283,6 +311,7 @@ Then open `http://localhost:5173` in your browser.
 - fastapi
 - uvicorn
 - python-multipart
+- sqlmodel
 
 Install Python dependencies:
 
@@ -300,10 +329,10 @@ cd frontend && npm install
 
 ## Future Plans
 
-- [*] Support for single image/screenshot detection (not just video)
-- [*] Confidence score display in output
-- [ ] Results page with full confidence breakdown and frame viewer
-- [ ] Detection history page with past predictions
+- [x] Support for single image/screenshot detection
+- [x] Confidence score display in output
+- [x] Results page with confidence breakdown and frame viewer
+- [x] Detection history page
 - [ ] Deduplication — reuse results for previously seen clips
 - [ ] Event detection within clips (kills, deaths, aces, explosions, etc.)
 - [ ] Expand shipped reference library with more games
