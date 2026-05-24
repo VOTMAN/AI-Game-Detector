@@ -143,7 +143,8 @@ async def predClip(
             id=temp_id,
             prediction=result["prediction"],
             confidences=result["confidences"],
-            frames=[f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)]
+            frames=[f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)],
+            time_taken=result["time_taken"]
         ))
 
         print(res)

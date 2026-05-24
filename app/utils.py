@@ -1,7 +1,8 @@
 import os
 import pickle
-from collections import Counter
+from time import time
 
+from collections import Counter
 from detector import detectGameTopK
 from embeddings import buildReferenceEmbeddings
 from video import getVideoDetails, videoToFrames
@@ -60,6 +61,8 @@ def secondsToTime(seconds: int):
 
 
 def detectVideo(path, referenceEmbeddings, startTime="00:00", endTime=None):
+    start = time()
+
     print("VIDEO DETECTION: ")
     if not os.path.exists(path):
         print("Video does not exist.\n")
@@ -170,10 +173,14 @@ def detectVideo(path, referenceEmbeddings, startTime="00:00", endTime=None):
     for ref in influentialFrames:
         print(ref)
 
+    processing_time = "{:.2f}".format(time() - start)
+    print(f"\n---> Processing took {processing_time}s <---")
+
     return {
         "prediction": finalPrediction,
         "confidences": sortedConfidences,
         "influential_frames": influentialFrames,
+        "time_taken": processing_time
     }
 
 

@@ -1,13 +1,13 @@
 import sys
-import time
 
 from utils import (
-    detectVideo, 
     detectFrame, 
+    detectVideo, 
     loadReferenceEmbeddings
 )
 
 referenceEmbeddings = loadReferenceEmbeddings()
+
 
 def main():
 
@@ -34,19 +34,21 @@ def main():
         if path.lower() == "q":
             break
 
-        start = time.time()
-        if path.endswith((".mp4", ".mov", ".avi")):    
-            detectVideo(path, referenceEmbeddings=referenceEmbeddings, startTime=startTime, endTime=endTime)
+        if path.endswith((".mp4", ".mov", ".avi")):
+            detectVideo(
+                path,
+                referenceEmbeddings=referenceEmbeddings,
+                startTime=startTime,
+                endTime=endTime,
+            )
 
-        elif path.endswith((".png", ".jpg", ".jpeg")): 
+        elif path.endswith((".png", ".jpg", ".jpeg")):
             detectFrame(path, referenceEmbeddings)
 
         else:
-            
             print("Unsupported File Format")
             print("Only support Video(.mp4, .mov, .avi) and Picture(.png, .jpg, .jpeg)")
-        
-        print(f"\n---> Processing took {time.time() - start:.2f}s <---")
+
         print("\n---\n")
 
 

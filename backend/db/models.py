@@ -8,3 +8,4 @@ class PredResults(SQLModel, table=True):
         sa_column=Column(JSON)
     )
     frames: List[str] = Field(sa_column=Column(JSON))
+    time_taken: float
