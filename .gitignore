@@ -8,3 +8,4 @@ videoClips
 __pycache__/
 *.pyc
 *.env
+*.db

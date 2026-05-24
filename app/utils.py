@@ -1,5 +1,5 @@
-import pickle
 import os
+import pickle
 from collections import Counter
 
 from detector import detectGameTopK
@@ -9,6 +9,7 @@ from video import getVideoDetails, videoToFrames
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_DIR = os.path.join(BASE_DIR, "cachedEmbeddings")
 os.makedirs(CACHE_DIR, exist_ok=True)
+
 
 def cacheEmbeddings(embeddings):
     # print(embeddings)
@@ -21,7 +22,9 @@ def cacheEmbeddings(embeddings):
 
 def loadReferenceEmbeddings():
     if os.path.exists(os.path.join(CACHE_DIR, "refEmbed.pkl")):
-        print("-> Using cached Embedding.\n-> Delete cache if you want to create new embeddings")
+        print(
+            "-> Using cached Embedding.\n-> Delete cache if you want to create new embeddings"
+        )
 
         with open(os.path.join(CACHE_DIR, "refEmbed.pkl"), "rb") as f:
             referenceEmbeddings = pickle.load(f)
@@ -31,20 +34,22 @@ def loadReferenceEmbeddings():
     else:
         # Build reference embeddings once
         print("-> No cache, building embeddings\n")
-    
+
         referenceEmbeddings, _ = buildReferenceEmbeddings()
 
         cacheEmbeddings(referenceEmbeddings)
-    
+
         print("-> Saved embeddings to cache")
 
     return referenceEmbeddings
+
 
 def timeToSeconds(time: str):
     min, sec = time.split(":")
     secs = (int(min) * 60) + int(sec)
 
     return secs
+
 
 def secondsToTime(seconds: int):
 
@@ -53,7 +58,8 @@ def secondsToTime(seconds: int):
 
     return f"{minutes:02d}:{remainingSeconds:02d}"
 
-def detectVideo(path, referenceEmbeddings, startTime='00:00', endTime=None):
+
+def detectVideo(path, referenceEmbeddings, startTime="00:00", endTime=None):
     print("VIDEO DETECTION: ")
     if not os.path.exists(path):
         print("Video does not exist.\n")
@@ -75,8 +81,8 @@ def detectVideo(path, referenceEmbeddings, startTime='00:00', endTime=None):
     if endSeconds > videoDuration:
         endSeconds = int(videoDuration)
 
-    if (endSeconds - startSeconds) > 180:
-        endSeconds = startSeconds + 180
+    if (endSeconds - startSeconds) > 120:
+        endSeconds = startSeconds + 120
         print(f"-> Clip too long, trimmed to {secondsToTime(endSeconds)}")
 
     endTime = secondsToTime(endSeconds)
@@ -90,7 +96,7 @@ def detectVideo(path, referenceEmbeddings, startTime='00:00', endTime=None):
         outputFolder=clipName,
         intervalSeconds=2,
         startTime=startTime,
-        endTime=endTime
+        endTime=endTime,
     )
 
     if frameFolder is None:
@@ -142,22 +148,17 @@ def detectVideo(path, referenceEmbeddings, startTime='00:00', endTime=None):
         game: (count / totalCount) * 100 for game, count in gameCounts.items()
     }
 
-    sortedConfidences = sorted(
-        confidences.items(), key=lambda x: x[1], reverse=True
-    )
+    sortedConfidences = sorted(confidences.items(), key=lambda x: x[1], reverse=True)
 
     # Game Prediction Result
     finalPrediction = gameCounts.most_common(1)[0][0]
 
     # Best frames from Clip (sorted by confidence)
-    sortedFrames = sorted(
-        allTopMatches, key=lambda x: x["confidence"], reverse=True
-    )
+    sortedFrames = sorted(allTopMatches, key=lambda x: x["confidence"], reverse=True)
 
     topFrames = sortedFrames[:3]
 
     influentialFrames = [item["frame"] for item in topFrames]
-
 
     print(f"\nDetected Game: {finalPrediction}\n")
 
@@ -172,8 +173,9 @@ def detectVideo(path, referenceEmbeddings, startTime='00:00', endTime=None):
     return {
         "prediction": finalPrediction,
         "confidences": sortedConfidences,
-        "influential_frames": influentialFrames
+        "influential_frames": influentialFrames,
     }
+
 
 def detectFrame(path, referenceEmbeddings):
     if not os.path.exists(path):
@@ -184,6 +186,6 @@ def detectFrame(path, referenceEmbeddings):
     print("\nGame: ", result["prediction"])
     if result["prediction"] != "Unknown Game":
         print("Confidence:  ", result["confidence"])
-        return result["prediction"], result["confidence"] 
-    
+        return result["prediction"], result["confidence"]
+
     return result["prediction"], None

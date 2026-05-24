@@ -13,6 +13,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.status import HTTP_504_GATEWAY_TIMEOUT
 
+from db.models import PredResults
+from db.db import initDB, saveResult, getResult, getAllResults
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../app"))
 sys.path.append(parent_dir)
 
@@ -23,8 +26,7 @@ VIDEO_DIR = os.path.join(BASE_DIR, "extractedFrames")
 SAVE_DIR = Path(VIDEO_DIR) / "save"
 TIME_REGX = r"^(?:[0-5]\d):(?:[0-5]\d)$"
 
-
-REQUEST_TIMEOUT_ERROR = 10
+REQUEST_TIMEOUT_ERROR = 20
 
 referenceEmbeddings = loadReferenceEmbeddings()
 
@@ -51,6 +53,7 @@ async def cleanupOldFrames():
 
 @app.on_event("startup")
 async def startup():
+    initDB()
     asyncio.create_task(cleanupOldFrames())
 
 
@@ -76,21 +79,20 @@ async def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/frames/{temp_id}/{filename}")
-async def get_frame(temp_id: str, filename: str):
-
-    req_path = (SAVE_DIR / temp_id / filename).resolve()
-
-    if not str(req_path).startswith(str(SAVE_DIR.resolve())):
-        return {"error": "Invalid Path"}
-
-    if not os.path.exists(req_path):
-        return {"error": "Frame not found, Rerun Detection"}
-    return FileResponse(req_path, media_type="image/jpeg")
+@app.get("/api/results/all")
+async def getAllRes():
+    res: list[PredResults] = getAllResults()
+    return res
 
 
-@app.post("/upload/clip")
-async def getClip(
+@app.get("/api/results/{id}")
+async def getRes(id: str):
+    res: PredResults = getResult(id)
+    return res
+
+
+@app.post("/api/upload/clip")
+async def predClip(
     file: UploadFile,
     startTime: str | None = Form("00:00"),
     endTime: str | None = Form(None),
@@ -116,7 +118,7 @@ async def getClip(
         shutil.copyfileobj(file.file, f)
 
     try:
-        print(temp_video_path, startTime, endTime)
+        # print(temp_video_path, startTime, endTime)
         result = detectVideo(temp_video_path, referenceEmbeddings, startTime, endTime)
 
         if result is None:
@@ -137,12 +139,15 @@ async def getClip(
                 os.path.join(base_parent_dir, "medium", med_img_name), img_save_dir
             )
 
-        return {
-            "id": temp_id,
-            "prediction": result["prediction"],
-            "confidences": result["confidences"],
-            "frames": [f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)],
-        }
+        res = saveResult(PredResults(
+            id=temp_id,
+            prediction=result["prediction"],
+            confidences=result["confidences"],
+            frames=[f"/frames/{temp_id}/{f}" for f in os.listdir(img_save_dir)]
+        ))
+
+        print(res)
+        return {"id": temp_id}
 
     except Exception as e:
         print(e)
@@ -155,8 +160,8 @@ async def getClip(
             shutil.rmtree(extract_dir)
 
 
-@app.post("/upload/frame")
-async def getFrame(file: UploadFile):
+@app.post("/api/upload/frame")
+async def predFrame(file: UploadFile):
     temp_id = str(uuid.uuid4())
     temp_frame_path = f"/tmp/{temp_id}"
 

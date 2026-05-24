@@ -5,36 +5,51 @@
 	let loading = $state(false);
 	let errorText = $state<string | undefined>(undefined);
 	let re = /^(?:[0-5]\d):(?:[0-5]\d)$/;
-	const MAX_VIDEO_SIZE = 500 * 1024 * 1024;
+	const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
 
 	function handleVideoChange(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
 		errorText = undefined;
 		if (!file) return;
 		if (file.size > MAX_VIDEO_SIZE) {
-			errorText = 'Video must be under 500MB';
+			errorText = 'Video must be under 200MB';
 			return;
 		}
 		videoFile = file;
 	}
 
-	function handleSubmit(e: SubmitEvent) {
+	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		errorText = undefined;
-		if (!videoFile || !startTime) {
+		if (!videoFile) {
 			errorText = 'All fields must be filled';
 			return;
 		}
 
-		if ((startTime && re.test(startTime)) || (endTime && re.test(endTime))) {
+		if ((startTime && !re.test(startTime)) || (endTime && !re.test(endTime))) {
 			errorText = 'Invalid time format';
 			return;
 		}
 
-		loading = true;
-		console.log('Uploading Video', videoFile, startTime, endTime);
-		// upload
-		loading = false;
+		// console.log('Uploading Video', videoFile, startTime, endTime);
+		try {
+			loading = true;
+			const form = new FormData();
+			form.append('file', videoFile);
+			form.append('startTime', startTime);
+			if (endTime) form.append('endTime', endTime);
+
+			const res = await fetch('/api/upload/clip', {
+				method: 'POST',
+				body: form
+			});
+			const result = await res.json();
+			console.log(result);
+		} catch (e) {
+			console.log(e);
+		} finally {
+			loading = false;
+		}
 	}
 </script>
 
@@ -47,12 +62,12 @@
 		</p>
 	</hgroup>
 	<span>
-		Video file is required. Supported file formats: .mp4, .mov, .avi<br /><br />
+		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 200mb<br /><br />
 		Start Time and End Time are optional. If a length greater than 2 minutes is given it will automatically
-		be reduced to a 2 minute limit.
+		be reduced to a 2 minute limit. Ideally server expect a clip of 30 seconds to 1 minute
 	</span>
 	<div class="container">
-		<form onsubmit={handleSubmit}>
+		<form onsubmit={handleSubmit} enctype="multipart/form-data">
 			<input
 				type="file"
 				name="videoPicker"
