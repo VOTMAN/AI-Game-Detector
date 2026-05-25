@@ -4,6 +4,7 @@
 	let errorText = $state<string | undefined>(undefined);
 	let result = $state<object | undefined>(undefined);
 	const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+	import { API_BASE } from '$lib/config';
 
 	function handleFrameChange(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
@@ -27,7 +28,7 @@
 		try {
 			const form = new FormData();
 			form.append('file', frameFile);
-			const res = await fetch('/api/upload/frame', {
+			const res = await fetch(`${API_BASE}/api/upload/frame`, {
 				method: 'POST',
 				body: form
 			});

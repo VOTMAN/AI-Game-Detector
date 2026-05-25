@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { API_BASE } from '$lib/config';
 
 	let videoFile = $state<File | undefined>(undefined);
 	let startTime = $state('00:00');
@@ -42,7 +43,7 @@
 			form.append('startTime', startTime);
 			if (endTime) form.append('endTime', endTime);
 
-			const res = await fetch('/api/upload/clip', {
+			const res = await fetch(`${API_BASE}/api/upload/clip`, {
 				method: 'POST',
 				body: form
 			});
