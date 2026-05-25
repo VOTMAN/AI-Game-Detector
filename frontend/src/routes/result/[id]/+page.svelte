@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import { resolve } from '$app/paths';
+	import { API_BASE } from '$lib/config';
 
 	let images: string[] = $state([]);
 	let errorText: string | null = $state(null);
@@ -10,8 +11,8 @@
 		const id = data.id;
 		const paths = data.frames;
 		for (const path of paths!) {
-			const filename = path.split('/')[4];
-			const res = await fetch(`/api/frames/${id}/${filename}`);
+			const filename = path.split('/').at(-1);
+			const res = await fetch(`${API_BASE}/api/frames/${id}/${filename}`);
 			const img = await res.blob();
 			console.log(img);
 			if (img.type == 'application/json') {
