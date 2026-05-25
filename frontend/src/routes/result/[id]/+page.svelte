@@ -8,21 +8,15 @@
 	let { data }: PageProps = $props();
 
 	async function getImages() {
-		const id = data.id;
-		const paths = data.frames;
-		for (const path of paths!) {
-			const filename = path.split('/').at(-1);
-			const res = await fetch(`${API_BASE}/api/frames/${id}/${filename}`);
+		for (const path of data.frames!) {
+			const res = await fetch(`${API_BASE}${path}`);
 			const img = await res.blob();
-			console.log(img);
-			if (img.type == 'application/json') {
-				errorText = 'No Images, Images cleared from server. ';
+			if (img.type === 'application/json') {
+				errorText = 'No images found. They may have been cleared from the server.';
 				return;
 			}
-			const imgUrl = URL.createObjectURL(img);
-			images = [...images, imgUrl];
+			images = [...images, URL.createObjectURL(img)];
 		}
-		console.log(images);
 	}
 </script>
 
