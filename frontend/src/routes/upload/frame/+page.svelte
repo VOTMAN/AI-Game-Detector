@@ -33,7 +33,7 @@
 				body: form
 			});
 			const pred = await res.json();
-			console.log(pred);
+			// console.log(pred);
 			result = {
 				prediction: pred['prediction'],
 				confidence: pred['confidence']

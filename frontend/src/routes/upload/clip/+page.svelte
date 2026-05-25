@@ -9,14 +9,14 @@
 	let loading = $state(false);
 	let errorText = $state<string | undefined>(undefined);
 	let re = /^(?:[0-5]\d):(?:[0-5]\d)$/;
-	const MAX_VIDEO_SIZE = 350 * 1024 * 1024;
+	const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
 	function handleVideoChange(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
 		errorText = undefined;
 		if (!file) return;
 		if (file.size > MAX_VIDEO_SIZE) {
-			errorText = 'Video must be under 350MB';
+			errorText = 'Video must be under 100MB';
 			return;
 		}
 		videoFile = file;
@@ -47,8 +47,13 @@
 				method: 'POST',
 				body: form
 			});
-			const { id } = await res.json();
-			goto(resolve(`/result/${JSON.stringify(id).replaceAll('"', '')}`));
+			const { id, error } = await res.json();
+			if (error) {
+				errorText = error;
+				return;
+			}
+			// console.log(id, error);
+			goto(resolve(`/result/${id}`));
 		} catch (e) {
 			console.log(e);
 		} finally {
@@ -61,14 +66,14 @@
 	<hgroup>
 		<h3>Clip Detection</h3>
 		<p>
-			The frames from the clip will be extracted (up to 2 mins) and the model will check through its
+			The frames from the clip will be extracted (up to 1 mins) and the model will check through its
 			reference library and try to detect the game. Only known games are detectable.
 		</p>
 	</hgroup>
 	<span>
-		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 200mb<br /><br />
-		Start Time and End Time are optional. If a length greater than 2 minutes is given it will automatically
-		be reduced to a 2 minute limit. Ideally server expect a clip of 30 seconds to 1 minute
+		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 100mb<br /><br />
+		Start Time and End Time are optional. Ideally server expect a clip of 30 seconds to 1 minute. If you
+		want to use longer clips, clone the repo and try on your own machine on your backend
 	</span>
 	<div class="container">
 		<form onsubmit={handleSubmit} enctype="multipart/form-data">

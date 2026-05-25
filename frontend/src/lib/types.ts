@@ -1,9 +1,10 @@
 export type DetectionResult = {
 	id: string;
+	status: 'processing' | 'done' | 'failed';
 	clip_name: string;
 	prediction: string;
-	confidences: Array<string | number>[] | null;
-	frames: Array<string> | null;
+	confidences: [string, number][] | null;
+	frames: string[] | null;
 	time_taken: number;
 	created_datetime: Date;
 };
