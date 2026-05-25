@@ -47,7 +47,11 @@
 				method: 'POST',
 				body: form
 			});
-			const { id } = await res.json();
+			const { id, error } = await res.json();
+			if (error) {
+				errorText = error;
+				return;
+			}
 			goto(resolve(`/result/${JSON.stringify(id).replaceAll('"', '')}`));
 		} catch (e) {
 			console.log(e);
