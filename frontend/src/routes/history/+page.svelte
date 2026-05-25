@@ -2,6 +2,7 @@
 	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { API_BASE } from '$lib/config';
 
 	let layoutOption: boolean = $state(false);
 	const { data }: PageProps = $props();
@@ -201,7 +202,7 @@
 						</header>
 
 						<img
-							src={`http://localhost:8000${result.frames![0]}`}
+							src={`${API_BASE}${result.frames![0]}`}
 							alt={result.prediction}
 							class="preview-image"
 						/>
