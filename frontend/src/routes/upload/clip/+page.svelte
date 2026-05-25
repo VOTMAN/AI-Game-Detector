@@ -66,14 +66,13 @@
 	<hgroup>
 		<h3>Clip Detection</h3>
 		<p>
-			The frames from the clip will be extracted (up to 2 mins) and the model will check through its
+			The frames from the clip will be extracted (up to 1 mins) and the model will check through its
 			reference library and try to detect the game. Only known games are detectable.
 		</p>
 	</hgroup>
 	<span>
-		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 200mb<br /><br />
-		Start Time and End Time are optional. If a length greater than 2 minutes is given it will automatically
-		be reduced to a 2 minute limit. Ideally server expect a clip of 30 seconds to 1 minute
+		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 100mb<br /><br />
+		Start Time and End Time are optional. Ideally server expect a clip of 30 seconds to 1 minute. If you want to use longer clips, clone the repo and try on your own machine on your backend
 	</span>
 	<div class="container">
 		<form onsubmit={handleSubmit} enctype="multipart/form-data">
