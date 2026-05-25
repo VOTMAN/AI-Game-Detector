@@ -9,14 +9,14 @@
 	let loading = $state(false);
 	let errorText = $state<string | undefined>(undefined);
 	let re = /^(?:[0-5]\d):(?:[0-5]\d)$/;
-	const MAX_VIDEO_SIZE = 350 * 1024 * 1024;
+	const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
 	function handleVideoChange(e: Event) {
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
 		errorText = undefined;
 		if (!file) return;
 		if (file.size > MAX_VIDEO_SIZE) {
-			errorText = 'Video must be under 350MB';
+			errorText = 'Video must be under 100MB';
 			return;
 		}
 		videoFile = file;
@@ -52,7 +52,8 @@
 				errorText = error;
 				return;
 			}
-			goto(resolve(`/result/${JSON.stringify(id).replaceAll('"', '')}`));
+			console.log(id, error);
+			goto(resolve(`/result/${id}`));
 		} catch (e) {
 			console.log(e);
 		} finally {

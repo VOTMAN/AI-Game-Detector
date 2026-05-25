@@ -38,7 +38,7 @@
 			</article>
 		{:else}
 			<div class="history-list">
-				{#each predList as result (result.id)}
+				{#each predList.filter((r) => r.status === 'done' || r.status === 'processing') as result (result.id)}
 					<article class="history-card">
 						<div class="card-main">
 							<div class="card-info">
@@ -52,10 +52,18 @@
 								</p>
 							</div>
 							<div class="card-right">
-								<span class="prediction-badge">{result.prediction}</span>
-								<span class="confidence-text"
-									>{result.confidences![0][1].toFixed(2)}% confidence</span
-								>
+								<span class="prediction-badge">
+									{result.status === 'processing'
+										? 'Processing...'
+										: result.status === 'failed'
+											? 'Failed'
+											: result.prediction}
+								</span>
+								{#if result.confidences && result.confidences.length > 0}
+									<span class="confidence-text"
+										>{result.confidences[0][1].toFixed(2)}% confidence</span
+									>
+								{/if}
 							</div>
 						</div>
 						<footer class="card-footer">
@@ -195,17 +203,31 @@
 	{:else}
 		{#if !data.error && predList!.length > 0}
 			<div class="grid">
-				{#each predList as result (result.id)}
+				{#each predList.filter((r) => r.status === 'done') as result (result.id)}
 					<article class="prediction-card">
 						<header>
 							<strong>{result.prediction}</strong>
 						</header>
 
-						<img
-							src={`${API_BASE}${result.frames![0]}`}
-							alt={result.prediction}
-							class="preview-image"
-						/>
+						{#if result.frames && result.frames.length > 0}
+							<img
+								src={`${API_BASE}${result.frames[0]}`}
+								alt={result.prediction}
+								class="preview-image"
+							/>
+						{:else}
+							<div
+								class="preview-image"
+								style="background: var(--pico-card-sectioning-background-color); display:flex; align-items:center; justify-content:center;"
+							>
+								<i class="ti ti-photo-off" style="font-size:32px; color:var(--pico-muted-color);"
+								></i>
+							</div>
+						{/if}
+
+						{#if result.confidences && result.confidences.length > 0}
+							<p><b>Top Confidence:</b> {result.confidences[0][1].toFixed(2)}%</p>
+						{/if}
 
 						<h5>{result.clip_name}</h5>
 
