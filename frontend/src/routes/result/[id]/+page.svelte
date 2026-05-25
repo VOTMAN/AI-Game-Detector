@@ -25,15 +25,7 @@
 	});
 
 	async function getImages() {
-		for (const path of result.frames!) {
-			const res = await fetch(`${API_BASE}${path}`);
-			const img = await res.blob();
-			if (img.type === 'application/json') {
-				errorText = 'No images found. They may have been cleared from the server.';
-				return;
-			}
-			images = [...images, URL.createObjectURL(img)];
-		}
+		images = (result.frames ?? []).map((path) => `${API_BASE}${path}`);
 	}
 </script>
 

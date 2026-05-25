@@ -55,16 +55,16 @@ def buildReferenceEmbeddings(refFolder = REF_DIR):
             })
     
     
-    for game, embeddings in referenceEmbeddings.items():
+    # for game, embeddings in referenceEmbeddings.items():
         
-        stacked = torch.stack([
-            item["embedding"]
-            for item in embeddings
-        ])
+    #     stacked = torch.stack([
+    #         item["embedding"]
+    #         for item in embeddings
+    #     ])
         
-        meanEmbedding = torch.mean(stacked, dim = 0)
+    #     meanEmbedding = torch.mean(stacked, dim = 0)
         
-        meanEmbedding /= meanEmbedding.norm(dim=-1, keepdim=True)
-        gameMeanEmbeddings[game] = meanEmbedding
+    #     meanEmbedding /= meanEmbedding.norm(dim=-1, keepdim=True)
+    #     gameMeanEmbeddings[game] = meanEmbedding
 
     return referenceEmbeddings, gameMeanEmbeddings

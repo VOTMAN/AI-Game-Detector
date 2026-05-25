@@ -52,7 +52,7 @@
 				errorText = error;
 				return;
 			}
-			console.log(id, error);
+			// console.log(id, error);
 			goto(resolve(`/result/${id}`));
 		} catch (e) {
 			console.log(e);
@@ -72,7 +72,8 @@
 	</hgroup>
 	<span>
 		Video file is required. Supported file formats: .mp4, .mov, .avi. Size Limit: 100mb<br /><br />
-		Start Time and End Time are optional. Ideally server expect a clip of 30 seconds to 1 minute. If you want to use longer clips, clone the repo and try on your own machine on your backend
+		Start Time and End Time are optional. Ideally server expect a clip of 30 seconds to 1 minute. If you
+		want to use longer clips, clone the repo and try on your own machine on your backend
 	</span>
 	<div class="container">
 		<form onsubmit={handleSubmit} enctype="multipart/form-data">
