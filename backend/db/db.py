@@ -1,8 +1,11 @@
+import os
+
 from .models import PredResults
 from sqlmodel import Session, SQLModel, create_engine, select
 
-SQLLITE_URL = "sqlite:///results.db"
-engine = create_engine(SQLLITE_URL)
+DB_PATH = os.environ.get("DB_PATH", "/data/results.db")
+SQLLITE_URL = f"sqlite:///{DB_PATH}"
+engine = create_engine(SQLLITE_URL, connect_args={"check_same_thread": False})
 
 def initDB():
     SQLModel.metadata.create_all(engine)
@@ -10,7 +13,13 @@ def initDB():
 def saveResult(result: PredResults):
     try:
         with Session(engine) as session:
-            session.add(result)
+            existing = session.get(PredResults, result.id)
+            if existing:
+                for key, value in result.model_dump().items():
+                    setattr(existing, key, value)
+                session.add(existing)
+            else:
+                session.add(result)
             session.commit()
     except Exception as e:
         print(e)
