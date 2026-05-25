@@ -4,11 +4,19 @@ import type { DetectionResult } from '$lib/types';
 import { API_BASE } from '$lib/config';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`${API_BASE}/api/results/${params.id}`);
-	const result: DetectionResult = await res.json();
-	if (result == null) {
-		error(404, 'Give id does not exits');
+	while (true) {
+		const res = await fetch(`${API_BASE}/api/results/${params.id}`);
+
+		if (!res.ok) {
+			error(404, 'Given id does not exist');
+		}
+
+		const result: DetectionResult = await res.json();
+
+		if (result.status === 'done' || result.status === 'failed') {
+			return result;
+		}
+
+		await new Promise((r) => setTimeout(r, 3000));
 	}
-	// console.log(result);
-	return result;
 };
