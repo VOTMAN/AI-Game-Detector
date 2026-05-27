@@ -137,7 +137,7 @@ Evaluated on a held-out test set of frames across all supported games, plus a ne
 
 ```bash
 git clone <repo-url>
-cd aipro
+cd AI-Game-Detector
 python -m venv myenv
 source myenv/bin/activate       # Windows: myenv\Scripts\activate
 ```
@@ -344,6 +344,8 @@ Then open `http://localhost:5173` in your browser.
 - uvicorn
 - python-multipart
 - sqlmodel
+- scikit-learn
+- matplotlib
 
 Install Python dependencies:
 
