@@ -51,22 +51,24 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 ```
 .
 ├── app/
-│   ├── main.py              # CLI entry point + shared detectVideo / detectFrame functions
-│   ├── detector.py          # Frame-level game detection
-│   ├── embeddings.py        # OpenCLIP model + embedding functions
-│   ├── video.py             # Video frame extraction
-│   └── utils.py             # Embedding cache helpers + shared detection wrappers
+│   ├── main.py                 # CLI entry point + shared detectVideo / detectFrame functions
+│   ├── detector.py             # Frame-level game detection
+│   ├── embeddings.py           # OpenCLIP model + embedding functions
+│   ├── video.py                # Video frame extraction
+│		├── evaluate.py		          # Test model performace with testing directory containing folders (Game Names) with their screenshots or pictures
+│   └── utils.py                # Embedding cache helpers + shared detection wrappers
 ├── backend/
-│   ├── main.py              # FastAPI server
+│   ├── main.py                 # FastAPI server
 │   └──db/
 │      ├── db.py                # SQLite database helpers (init, save, get, getAll)
 │      └── models.py            # SQLModel table definitions (PredResults)
 ├── cachedEmbeddings/
-│   └── refEmbed.pkl         # Pre-built embeddings (shipped with repo)
-├── extractedFrames/         # Auto-generated during detection
-│   └── save/                # Persistent influential frames served to the frontend (The server auto delete after 2 hours)
+│   └── refEmbed.pkl             # Pre-built embeddings (shipped with repo)
+├── data
+│		└── extractedFrames/         # Auto-generated during detection. Contains cli detection and temporarily the backend before they are deleted
+│   		└── save/                # Persistent influential frames served to the frontend (The server auto delete after 2 hours)
 ├── requirements.txt
-└── frontend/                # SvelteKit web UI
+└── frontend/                		 # SvelteKit web UI
     ├── src/
     │   ├── lib/
     │   │   ├── assets/
