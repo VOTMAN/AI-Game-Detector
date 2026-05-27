@@ -31,8 +31,20 @@ def detectGameTopK(queryImgPath, referenceEmbeddings):
         }
 
     top1 = topMatches[0]["score"]
-    top2 = topMatches[1]["score"]
-    margin = top1 - top2
+    top1Game = topMatches[0]["game"]
+
+    top2diff = next(
+        (
+            match["score"] for match in topMatches 
+            if top1Game != match["game"]
+        ),
+        None
+    )
+    
+    if top2diff:
+        margin = top1 - top2diff
+    else:
+        margin = top1
 
     negativeScore = max(
         (match["score"] for match in topMatches if match["game"] == "NEGATIVE"),

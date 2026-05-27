@@ -99,6 +99,38 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 
 ---
 
+## Model Performance
+
+Evaluated on a held-out test set of frames across all supported games, plus a negative set of frames from unsupported games to test rejection ability.
+
+### Results
+
+**Overall Accuracy: 79.22%** | **Unknown Rate: 19.23%** | **False Positive Rate: 7.69%**
+
+| Game | Precision | Recall | F1 |
+|---|---|---|---|
+| CS2 | 0.92 | 0.94 | 0.93 |
+| Hollow Knight Series | 0.99 | 0.96 | 0.97 |
+| The Finals | 0.94 | 0.79 | 0.86 |
+| Valorant | 1.00 | 0.41 | 0.58 |
+| Cuphead | 0.98 | 0.86 | 0.91 |
+| Elden Ring | 1.00 | 0.93 | 0.96 |
+
+### Confusion Matrix
+
+![Confusion Matrix](assets/confusion_matrix.png)
+
+### Notes
+
+- **Apex Legends** hasn't been tested yet
+- **Valorant** has perfect precision (1.00) but low recall (0.41) — the model only predicts Valorant when highly confident. This is due to limited map coverage in the reference library and will improve with more diverse reference screenshots.
+- **The Finals** unknown rate is similarly caused by missing map/mode coverage in the reference library.
+- **False positive rate** measures how often frames from unsupported games are incorrectly classified as a known game. At 7.69% the rejection threshold is working well.
+- Hollow Knight and Hollow Knight: Silksong are treated as a single class (`Hollow_Knight_Series`) due to near-identical visual styles shared between the two games.
+- The **unknown rate** is largely driven by Valorant — fix Valorant reference coverage and overall accuracy is expected to exceed 85%.
+
+---
+
 ## Setup
 
 **1. Clone the repo and create a virtual environment**
