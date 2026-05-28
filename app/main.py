@@ -1,14 +1,12 @@
 import sys
 
-from utils import (
-    detectFrame, 
-    detectVideo, 
-)    
-
 from embeddings import loadReferenceEmbeddings
+from utils import (
+    detectFrame,
+    detectVideo,
+)
 
-
-referenceEmbeddings = loadReferenceEmbeddings()
+referenceEmbeddings, _ = loadReferenceEmbeddings()
 
 
 def main():

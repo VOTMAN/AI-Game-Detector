@@ -19,7 +19,8 @@ from db.db import initDB, saveResult, getResult, getAllResults
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../app"))
 sys.path.append(parent_dir)
 
-from utils import detectFrame, detectVideo, loadReferenceEmbeddings
+from utils import detectFrame, detectVideo
+from embeddings import loadReferenceEmbeddings
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
