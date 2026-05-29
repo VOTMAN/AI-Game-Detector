@@ -1,11 +1,11 @@
 opencv-python
-matplotlib
 open_clip_torch
 ftfy
 regex
 tqdm
 torch
 Pillow
+
 fastapi
 uvicorn
 python-multipart
