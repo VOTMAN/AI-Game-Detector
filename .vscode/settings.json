@@ -1,0 +1,8 @@
+{
+    "python.defaultInterpreterPath": "/home/votmann/Projects/aipro/myenv/bin/python",
+    "python.analysis.extraPaths": [
+        "/home/votmann/Projects/aipro/app",
+        "/home/votmann/Projects/aipro/backend"
+    ],
+    "python.analysis.autoImportCompletions": true
+}
