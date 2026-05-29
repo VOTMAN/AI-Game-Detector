@@ -8,7 +8,7 @@ sys.path.append(parent_dir)
 
 from embeddings import buildClipEmbeddings, getTextEmbeddings
 
-BASE_DIR = (os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VEC_DB_PATH = os.environ.get("VEC_DB_PATH", os.path.join(BASE_DIR, "data", "chroma_vector_db")) 
 
 DATA_DIR = os.environ.get(
@@ -73,4 +73,5 @@ def getEmbeddings(textQuery):
         query_embeddings=queryEmbedding.tolist(),
         n_results=5
     )
+    print(res)
     return res["metadatas"]
