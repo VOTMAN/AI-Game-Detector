@@ -1,14 +1,53 @@
 # AI Game Detector
 
-Detects which video game is being played in a video clip using AI-powered image embeddings. Drop in a clip or a screenshot, get the game name.
+Detects which video game is being played in a video clip using AI-powered image embeddings. Drop in a clip or a screenshot, get the game name. Use the search to look for events in video clips through natural language queries
 
 Currently supports **CS2, Elden Ring, Hollow Knight Series (Hollow Knight and HK Silksong), Apex Legends, Valorant, Cuphead and The Finals**, with pre-built embeddings shipped directly in the repo.
+
+---
+
+## Web UI Preview
+
+### Homepage
+
+| Light Mode | Dark Mode |
+|---|---|
+| ![Homepage Light](assets/home_page_light.png) | ![Homepage Dark](assets/home_page_dark.png) |
+
+### Upload Pages
+
+| Clip Upload | Screenshot Upload |
+|---|---|
+| ![Clip Upload](assets/clip_page_dark.png) | ![Frame Upload](assets/frame_page_light.png) |
+
+### Results + History
+
+| Results Page | History Page |
+|---|---|
+| ![Results](assets/result_page_dark.png) | ![History](assets/history_page_dark.png) |
+
+---
+
+### Features
+
+- Video clip upload + detection
+- Screenshot detection
+- Natural language clip search
+- Detection history
+- Influential frame viewer
+- Light / dark theme support
 
 ---
 
 ## How It Works
 
 The detector uses **OpenCLIP (ViT-B-32)** to convert images into semantic embeddings — vector representations that capture visual meaning. These are compared against a library of reference screenshots to find the closest match.
+
+The strongest gameplay frames from each detected clip are averaged into a single embedding and stored in a vector database (**ChromaDB**). This enables semantic similarity search using natural language queries such as:
+
+- `valorant sniper`
+- `elden ring boss`
+- `hollow knight fight`
 
 ### Detection Flow
 
@@ -25,7 +64,7 @@ For each frame:
   → Pick best game for that frame         (detector.py)
     │
     ▼
-Majority vote across all frames           (main.py)         [Video only]
+Majority vote across all frames           (utils.py)         [Video only]
     │
     ▼
 Final Prediction: "Game Name"
@@ -36,9 +75,17 @@ Final Prediction: "Game Name"
 Detection runs at two levels for robustness:
 
 - **Frame level** (`detector.py`) — For each frame, the top 5 most similar reference images are found. Similarity scores are accumulated per game and the highest-scoring game wins that frame.
-- **Video level** (`main.py`) — Each frame casts one vote. The game with the most frame-level wins is the final prediction.
+- **Video level** (`utils.py`) — Each frame casts one vote. The game with the most frame-level wins is the final prediction.
 
 This means a single ambiguous frame (menu screen, cutscene, black screen) won't throw off the result — it gets outvoted by consistent gameplay frames.
+
+### Similarity Search
+
+After detection, influential gameplay frames are embedded and stored inside a Chroma vector database.
+
+User text queries are embedded using the same OpenCLIP text encoder and compared against stored clip embeddings.
+
+This allows semantic retrieval of clips without tags or manual labeling.
 
 ### Embedding Cache
 
@@ -55,18 +102,20 @@ Pre-built embeddings for all supported games are shipped in `cachedEmbeddings/re
 │   ├── detector.py             # Frame-level game detection
 │   ├── embeddings.py           # OpenCLIP model + embedding functions
 │   ├── video.py                # Video frame extraction
-│		├── evaluate.py		          # Test model performace with testing directory containing folders (Game Names) with their screenshots or pictures
+│		├── evaluate.py		          # Test model performance with testing directory containing folders (Game Names) with their screenshots or pictures
 │   └── utils.py                # Embedding cache helpers + shared detection wrappers
 ├── backend/
 │   ├── main.py                 # FastAPI server
 │   └──db/
 │      ├── db.py                # SQLite database helpers (init, save, get, getAll)
-│      └── models.py            # SQLModel table definitions (PredResults)
+│      ├── models.py            # SQLModel table definitions (PredResults)
+│	     └── vec_db.py						# vector database functions
 ├── cachedEmbeddings/
 │   └── refEmbed.pkl             # Pre-built embeddings (shipped with repo)
-├── data
+├── data												 # Contains sqlite database file
 │		└── extractedFrames/         # Auto-generated during detection. Contains cli detection and temporarily the backend before they are deleted
-│   		└── save/                # Persistent influential frames served to the frontend (The server auto delete after 2 hours)
+│   │		└── save/                # Persistent influential frames served to the frontend (The server auto delete after 2 hours)
+│	  └── chroma_vector_db         # Contains Chroma vector database files
 ├── requirements.txt
 └── frontend/                		 # SvelteKit web UI
     ├── src/
@@ -121,6 +170,10 @@ Evaluated on a held-out test set of frames across all supported games, plus a ne
 ### Confusion Matrix
 
 ![Confusion Matrix](assets/confusion_matrix.png)
+
+### Example Detection Result
+
+![Result Page](assets/result_page_light.png)
 
 ### Notes
 
@@ -348,6 +401,7 @@ Then open `http://localhost:5173` in your browser.
 - sqlmodel
 - scikit-learn
 - matplotlib
+- chromadb
 
 Install Python dependencies:
 
@@ -369,6 +423,7 @@ cd frontend && npm install
 - [x] Confidence score display in output
 - [x] Results page with confidence breakdown and frame viewer
 - [x] Detection history page
+- [x] Natural language similarity search using ChromaDB
 - [ ] Deduplication — reuse results for previously seen clips
 - [ ] Event detection within clips (kills, deaths, aces, explosions, etc.)
 - [ ] Expand shipped reference library with more games
