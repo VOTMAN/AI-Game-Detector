@@ -22,7 +22,7 @@ Currently supports **CS2, Elden Ring, Hollow Knight Series (Hollow Knight and HK
 
 ### Results + History
 
-| Results Page | History Page |
+|Results Page | History Page |
 |---|---|
 | ![Results](assets/result_page_dark.png) | ![History](assets/history_page_dark.png) |
 
